@@ -19,11 +19,11 @@ namespace SistemskoProgramiranjeProjekat2
     internal class Program
     {
         private static ConcurrentDictionary<string, string> cache = new ConcurrentDictionary<string, string>();
-        private static object cacheLock = new object();
+        //private static object cacheLock = new object();
 
         private static string rootPath = AppDomain.CurrentDomain.BaseDirectory;
         
-        static void Main(string[] args)
+        static Task Main(string[] args)
         {
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add("http://localhost:5050/");
@@ -47,8 +47,8 @@ namespace SistemskoProgramiranjeProjekat2
 
             string responseText = "";
 
-            lock (cacheLock)// samo jedan thread moze da pristupa kesu u datom trenutku
-            {
+           // lock (cacheLock)// samo jedan thread moze da pristupa kesu u datom trenutku
+            //{
                 if (cache.TryGetValue(fileName, out responseText))
                 {
                     Console.WriteLine("[Keš] Poslat rezultat iz kesa.");
@@ -56,7 +56,7 @@ namespace SistemskoProgramiranjeProjekat2
                     Odgovori(context, response);
                     return;
                 }
-            }
+            //}
 
             // Traženje fajla u root-u i podfolderima
             string filePath = PronadjiFajl(rootPath, fileName);
@@ -75,9 +75,9 @@ namespace SistemskoProgramiranjeProjekat2
                 using (StreamReader sr = new StreamReader(filePath, Encoding.UTF8))
                 {
                     string txt;
+                    txt = await sr.ReadToEndAsync();
                     string[] words;
                     int count = 0;
-                    txt = await sr.ReadToEndAsync();
                     words = txt.Split(new char[] { ' ', '\n', '\r', '\t', '.', ',', ';', ':', '!', '?' });
                     foreach(var word in words)
                     {
@@ -94,10 +94,10 @@ namespace SistemskoProgramiranjeProjekat2
                 }
 
                 // Dodaj u keš
-                lock (cacheLock)
-                {
+                //lock (cacheLock)
+                //{
                     cache[fileName] = responseText;
-                }
+                //}
                 string response = $"<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>My Web Page</title></head><body><h1>{responseText}</h1></body></html>";
                 Odgovori(context, response);
             }
@@ -140,14 +140,14 @@ namespace SistemskoProgramiranjeProjekat2
             return suglasnici > samoglasnici;
         }
 
-        private static async void Odgovori(HttpListenerContext context, string responseText, int statusCode = 200)
+        private static void Odgovori(HttpListenerContext context, string responseText, int statusCode = 200)
         {
             context.Response.StatusCode = statusCode;
             byte[] buffer = Encoding.UTF8.GetBytes(responseText);
             context.Response.ContentLength64 = buffer.Length;
             using (Stream output = context.Response.OutputStream)
             {
-                await output.WriteAsync(buffer, 0, buffer.Length);
+                 output.Write(buffer, 0, buffer.Length);
             }
         }
     }
