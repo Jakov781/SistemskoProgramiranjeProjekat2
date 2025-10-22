@@ -38,7 +38,7 @@ namespace SistemskoProgramiranjeProjekat2
                 Task.Run(() => ObradiZahtev(context));
             }
         }
-        private static async void ObradiZahtev(HttpListenerContext context)
+        private static async Task ObradiZahtev(HttpListenerContext context)
         {
             string fileName = context.Request.RawUrl.TrimStart('/');
 
