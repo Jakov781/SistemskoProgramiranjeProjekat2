@@ -46,7 +46,7 @@ namespace SistemskoProgramiranjeProjekat2
 
 
             string responseText = "";
-            // Proveri keš
+
             lock (cacheLock)// samo jedan thread moze da pristupa kesu u datom trenutku
             {
                 if (cache.TryGetValue(fileName, out responseText))
